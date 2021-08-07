@@ -6,22 +6,29 @@ const io = require('socket.io')(http, {
     cors: { origin: "*" }
 });
 
-const scoreRouter = require('./routes/score');
+const scoreRouter = require('./routes/scores');
 
 io.on('connection', (socket) => {
     console.log('a user connected');
 
     socket.on('UPDATE_SCORE', (message) =>     {
         console.log(`received update-score ws, payload ${JSON.stringify(message, null, 4)}`);
-        io.emit('message', `${socket.id.substr(0,2)} said ${message}` );   
+        io.emit('UPDATE_SCORE', message );
     });
 });
 
 app.use(cors());
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", '*');
+    res.header("Access-Control-Allow-Headers", 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header("Access-Control-Allow-Methods", 'PUT, GET');
+    next();
+  });
 app.use(express.json());
-app.use('/scores', scoreRouter);
+app.use('/api/scores', scoreRouter);
 
-http.listen(8081, () => console.log('listening on http://localhost:8081') );
+app.listen(8082, () => console.log('listening on http://localhost:8082') );
+http.listen(8081, () => console.log('listening on http://localhost:8081'));
 
 process.on('SIGINT', function () {
     console.log('Caught interrupt signal');
