@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-const http = require('http').createServer();
 const app = express();
+const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: { origin: "*" }
 });
@@ -27,8 +27,7 @@ app.use(function(req, res, next) {
 app.use(express.json());
 app.use('/api/scores', scoreRouter);
 
-app.listen(8082, () => console.log('listening on http://localhost:8082') );
-http.listen(8081, () => console.log('listening on http://localhost:8081'));
+http.listen(process.env.PORT || 8081, () => console.log('listening on http://localhost:8081'));
 
 process.on('SIGINT', function () {
     console.log('Caught interrupt signal');
