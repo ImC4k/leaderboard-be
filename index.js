@@ -12,11 +12,17 @@ const scoreRouter = require('./routes/scores.route');
 io.on('connection', (socket) => {
     console.log('a user connected');
 
-    socket.on('UPDATE_SCORE', (message) =>     {
-        console.log(`received update-score ws, payload ${JSON.stringify(message, null, 4)}`);
-        updateScore(message);
-        console.log('continuing');
-        io.emit('UPDATE_SCORE', message );
+    socket.on('UPDATE_SCORE', (message) => {
+        const { secret } = message;
+        if (JSON.stringify(secret) === JSON.stringify('0708')) {
+            console.log(`received update-score ws, payload ${JSON.stringify(message, null, 4)}`);
+            updateScore(message);
+            console.log('continuing');
+            io.emit('UPDATE_SCORE', message );
+        }
+        else {
+            console.log(`got bad secret`);
+        }
     });
 });
 
