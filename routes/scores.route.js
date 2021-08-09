@@ -1,7 +1,7 @@
 const router = require('express').Router();
-const initialScores = require('../initialScores.json');
 
 router.route('/initial-scores').get((req, res) => {
+    const initialScores = require('../scores.json');
     res.json(initialScores);
 });
 

@@ -1,19 +1,28 @@
 const express = require('express');
 const cors = require('cors');
-const http = require('http').createServer();
 const app = express();
+const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: { origin: "*" }
 });
+const { updateScore } = require('./scores_utils');
 
-const scoreRouter = require('./routes/scores');
+const scoreRouter = require('./routes/scores.route');
 
 io.on('connection', (socket) => {
     console.log('a user connected');
 
-    socket.on('UPDATE_SCORE', (message) =>     {
-        console.log(`received update-score ws, payload ${JSON.stringify(message, null, 4)}`);
-        io.emit('UPDATE_SCORE', message );
+    socket.on('UPDATE_SCORE', (message) => {
+        const { secret } = message;
+        if (JSON.stringify(secret) === JSON.stringify('0708')) {
+            console.log(`received update-score ws, payload ${JSON.stringify(message, null, 4)}`);
+            updateScore(message);
+            console.log('continuing');
+            io.emit('UPDATE_SCORE', message );
+        }
+        else {
+            console.log(`got bad secret`);
+        }
     });
 });
 
@@ -27,8 +36,7 @@ app.use(function(req, res, next) {
 app.use(express.json());
 app.use('/api/scores', scoreRouter);
 
-app.listen(8082, () => console.log('listening on http://localhost:8082') );
-http.listen(8081, () => console.log('listening on http://localhost:8081'));
+http.listen(process.env.PORT || 8081, () => console.log('listening on http://localhost:8081'));
 
 process.on('SIGINT', function () {
     console.log('Caught interrupt signal');
