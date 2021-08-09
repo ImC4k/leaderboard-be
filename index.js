@@ -5,14 +5,17 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: { origin: "*" }
 });
+const { updateScore } = require('./scores_utils');
 
-const scoreRouter = require('./routes/scores');
+const scoreRouter = require('./routes/scores.route');
 
 io.on('connection', (socket) => {
     console.log('a user connected');
 
     socket.on('UPDATE_SCORE', (message) =>     {
         console.log(`received update-score ws, payload ${JSON.stringify(message, null, 4)}`);
+        updateScore(message);
+        console.log('continuing');
         io.emit('UPDATE_SCORE', message );
     });
 });
