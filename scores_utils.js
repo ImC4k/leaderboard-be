@@ -1,22 +1,23 @@
-const fs = require('fs');
-const { findIndex } = require('lodash');
+let Score = require('./models/score.model');
 
 const updateScore = ({name, diff}) => {
     return new Promise((resolve, reject) => {
-        const scoresFilePath = './scores.json';
-        const scores = require(scoresFilePath);
-
-        const playerIndex = findIndex(scores, {name: name});
-        if (playerIndex === -1) { // not found
-            scores.push({name: name, score: diff});
-        }
-        else {
-            scores[playerIndex].score += diff;
-        }
-
-        console.log(`writing data: ${JSON.stringify(scores, null, 4)}`);
-        fs.writeFile(scoresFilePath, JSON.stringify(scores, null, 4), () => {console.log(`updated data to ${scoresFilePath}`)});
-        resolve(scores);
+        Score.findOne({name: name})
+        .then(playerRecord => {
+            if (playerRecord) {
+                console.log(`updating score record for ${name}`);
+                playerRecord.score += diff;
+                return playerRecord.save();
+            }
+            else {
+                console.log(`score record for ${name} is not found, creating a new record`);
+                const newScore = new Score({name: name, score: diff});
+                return newScore.save();
+            }
+        })
+        .then(savedRecord => {
+            console.log(`saved record: ${JSON.stringify(savedRecord, null, 4)}`);
+        })
     })
 };
 
