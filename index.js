@@ -1,3 +1,6 @@
+require('dotenv').config();
+
+const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -7,6 +10,14 @@ const io = require('socket.io')(http, {
 });
 const { updateScore } = require('./scores_utils');
 
+const DB_URI = process.env.DB_URI;
+const WS_SECRET = process.env.WS_SECRET;
+mongoose.connect(DB_URI, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true });
+const dbConnection = mongoose.connection;
+dbConnection.once('open', () => {
+    console.log('MongoDB database connected');
+});
+
 const scoreRouter = require('./routes/scores.route');
 
 io.on('connection', (socket) => {
@@ -14,7 +25,7 @@ io.on('connection', (socket) => {
 
     socket.on('UPDATE_SCORE', (message) => {
         const { secret } = message;
-        if (JSON.stringify(secret) === JSON.stringify('0708')) {
+        if (JSON.stringify(secret) === JSON.stringify(WS_SECRET)) {
             console.log(`received update-score ws, payload ${JSON.stringify(message, null, 4)}`);
             updateScore(message);
             console.log('continuing');
